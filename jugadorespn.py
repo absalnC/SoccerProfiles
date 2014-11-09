@@ -11,8 +11,6 @@ import csv
 driver=webdriver.Firefox()
 driver.get("http://www.espn.com.mx/futbol/jugador/_/id/45843/")
 #subUrl='http://www.espndeportes.com/futbol/jugador/_/id/')
-
-r=requests.get('http://www.espndeportes.com/futbol/jugador/_/id/')
 data=[]
 dict={}
 maxJugadores=213420
@@ -32,34 +30,36 @@ lugar_Nacimiento="NoDisp"
 altura=0.0
 peso="NoDisp"
 names=['Nombre','Numero','Posicion','Fecha_Nacimiento','Lugar_Nacimiento',
-       'Altura','Peso',]
+       'Altura','Peso','Temporada','Equipo','Competicion','Iniciados','Bancas',
+       'Goles','Asistencias','Disparos','Al_Arco','Cometidas','Recibidas',
+       'Amarillas','Rojas']
 f=open("/home/absalnc/Python/messi.csv","w")       
 if name:
-    nombre=name.contents[0].string
+    nombre=name.contents[0].string.encode('utf-8'.strip())
     if items:
         count = 0
         for ch in items:            
         
-            if count==0:
-                numero=ch.string
             if count==1:
-                posicion=ch.string
-            if count==2:
-                edad=ch.string
+                numero=ch.string.encode('utf-8'.strip())
             if count==3:
-                fecha_Nacimiento=ch.string
-            if count==4:
-                lugar_Nacimiento=ch.string
+                posicion=ch.string.encode('utf-8'.strip())
             if count==5:
-                altura=ch.string
-            if count==6:
-                peso=ch.string
+                edad=ch.string.encode('utf-8'.strip())
+            if count==7:
+                fecha_Nacimiento=ch.string.encode('utf-8'.strip())
+            if count==9:
+                lugar_Nacimiento=ch.string.encode('utf-8'.strip())
+            if count==11:
+                altura=ch.string.encode('utf-8'.strip())
+            if count==13:
+                peso=ch.string.encode('utf-8'.strip())
         
             count+=1
-            #print ch.string
+            
     
-#    w=csv.DictWriter(f)
-    #f.write(profile.encode('utf-8'.strip()))
+    w=csv.DictWriter(f,delimiter=',',fieldnames=names)
+    w.writeheader()
 
     
 
@@ -69,18 +69,23 @@ if name:
     for child in stats.findAll('table',):
         count =0   
         for tr in child.findAll('tr',{"class":lambda L:L!="colhead"}):
+            dict["Nombre"]=nombre
+            dict["Numero"]=numero
+            dict["Posicion"]=posicion
+            dict["Lugar_Nacimiento"]=lugar_Nacimiento
+            dict["Fecha_Nacimiento"]=fecha_Nacimiento
+            dict["Altura"]=altura
+            dict["Peso"]=peso
             if count==0 :
                 dict["Temporada"]=tr.text.encode('utf-8'.strip())
-                dict["Nombre"]=nombre
-                dict["Posicio"]=posicion
+                
             else:
                 countb=0
-                for td in tr.findAll("td"):
-                    
+                for td in tr.findAll("td"):                                       
                     if countb==0:
-                        dict["Equipo"]=td.text
+                       dict["Equipo"] =td.text.encode('utf-8'.strip())
                     if countb==1:
-                        dict["Competicion"]=td.text
+                        dict["Competicion"]=td.text.encode('utf-8'.strip())
                     if countb==2:
                         dict["Iniciados"]=int(td.text)
                     if countb==3:
@@ -88,11 +93,11 @@ if name:
                     if countb==4:
                         dict["Goles"]=int(td.text)
                     if countb==5:
-                        dict["Asistencias"]=int(td.text)
+                       dict["Asistencias"] =int(td.text)
                     if countb==6:
-                        dict["Disaros"]=int(td.text)
+                        dict["Disparos"]=int(td.text)
                     if countb==7:
-                        dict["Al_arco"]=int(td.text)
+                        dict["Al_Arco"]=int(td.text)
                     if countb==8:
                         dict["Cometidas"]=int(td.text)
                     if countb==9:
@@ -100,15 +105,9 @@ if name:
                     if countb==10:
                         dict["Amarillas"]=int(td.text)
                     if countb==11:
-                        dict["Rojas"]=int(td.text)
-                    countb+=1
-                    print dict
- #                   w.writerow(dict,delimiter=',',fieldnames=names)
+                        dict['Rojas']=int(td.text)
+                
+                    countb+=1                                 
+                w.writerow(dict)
             count+=1       
-    #print data 
-    f.close()#print dict
-        
-    #f.write(child.encode('utf-8'.strip()))
-   
-    #print count 
-#print data
+    f.close()
